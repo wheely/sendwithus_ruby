@@ -1,3 +1,4 @@
+1.1.1 - Better error handling for BadRequests and Authentication failures.
 1.0.5 - Add attachment support
 1.0.4 - Add drip campaign unsubscribe support
 1.0.3 - Don't allow nil email_id
