@@ -23,29 +23,23 @@ module SendWithUs
       @configuration = SendWithUs::Config.new(settings)
     end
 
-    def send_with(email_id, to, data = {}, from = {}, cc={}, bcc={}, files=[], esp_account='')
+    def send_with(email_id, to, data = {}, esp_account='')
 
       if email_id.nil?
         raise SendWithUs::ApiNilEmailId, 'email_id cannot be nil'
       end
 
-      payload = { email_id: email_id, recipient: to,
-        email_data: data }
+      data ||= {}
 
-      if from.any?
-        payload[:sender] = from
-      end
-      if cc.any?
-        payload[:cc] = cc
-      end
-      if bcc.any?
-        payload[:bcc] = bcc
-      end
-      if esp_account
-        payload[:esp_account] = esp_account
-      end
+      payload = { email_id: email_id, recipient: to, email_data: data[:data] || {} }
 
-      files.each do |path|
+      payload[:version_name] = data[:version_name] if data[:version_name].present?
+      payload[:sender] = from if data[:from].any?
+      payload[:cc] = cc if data[:cc].any?
+      payload[:bcc] = bcc if data[:bcc].any?
+      payload[:esp_account] = esp_account if esp_account
+
+      (data[:files] || []).each do |path|
         file = open(path).read
         id = File.basename(path)
         data = Base64.encode64(file)
@@ -87,18 +81,18 @@ module SendWithUs
     end
 
     def add_customer_event(customer, event_name, revenue=nil)
-      
-      if revenue.nil? 
+
+      if revenue.nil?
         payload = { event_name: event_name }
       else
         payload = { event_name: event_name, revenue: revenue}
-      end      
-      
+      end
+
       payload = payload.to_json
       endpoint = 'customers/' + customer + '/events'
       SendWithUs::ApiRequest.new(@configuration).post(endpoint, payload)
-    end    
+    end
 
-  end  
+  end
 end
 
