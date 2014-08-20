@@ -34,9 +34,9 @@ module SendWithUs
       payload = { email_id: email_id, recipient: to, email_data: data[:data] || {} }
 
       payload[:version_name] = data[:version_name] if data[:version_name].present?
-      payload[:sender] = from if data[:from].any?
-      payload[:cc] = cc if data[:cc].any?
-      payload[:bcc] = bcc if data[:bcc].any?
+      payload[:sender] = data[:from] if data[:from].any?
+      payload[:cc] =  data[:cc] if data[:cc].any?
+      payload[:bcc] = data[:bcc] if data[:bcc].any?
       payload[:esp_account] = esp_account if esp_account
 
       (data[:files] || []).each do |path|
