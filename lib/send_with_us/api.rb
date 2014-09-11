@@ -39,14 +39,10 @@ module SendWithUs
       payload[:bcc] = data[:bcc] if data[:bcc].any?
       payload[:esp_account] = esp_account if esp_account
 
-      (data[:files] || []).each do |path|
-        file = open(path).read
-        id = File.basename(path)
-        data = Base64.encode64(file)
-        if payload[:files].nil?
-          payload[:files] = []
+      if data[:files].present?
+        payload[:files] = data[:files].map do |file|
+          {id: file[:name], data: Base64.encode64(file[:content])}
         end
-        payload[:files] << {id: id, data: data}
       end
 
       payload = payload.to_json
