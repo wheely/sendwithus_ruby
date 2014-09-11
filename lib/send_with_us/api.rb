@@ -40,8 +40,9 @@ module SendWithUs
       payload[:esp_account] = esp_account if esp_account
 
       if data[:files].present?
-        payload[:files] = data[:files].map do |file|
-          {id: file[:name], data: Base64.encode64(file[:content])}
+        payload[:files] = []
+        data[:files].each do |filename, content|
+          payload[:files] << {id: filename, data: Base64.encode64(content)}
         end
       end
 
