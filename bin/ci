@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -ex
+
+case $(uname -s) in
+  Darwin)
+    name=app-dev
+    ;;
+  *)
+    name=app-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+    ;;
+esac
+
+docker-compose pull
+docker-compose build
+
+set +e
+rake_tests="bundle exec rake test"
+docker-compose run --entrypoint '/bin/sh -c' --name $name -e CI=1 gem "sleep 5 ; exec ${rake_tests}"
+re=$?
+
+if [ $re != 0 ] ; then
+  docker-compose down
+  docker-compose kill
+  docker-compose rm
+  exit $re
+fi
+
+mkdir -p test/
+docker cp $name:/app/test/reports test/
+
+set -e
+docker-compose down
+docker-compose kill
+docker-compose rm
+
